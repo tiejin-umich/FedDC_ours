@@ -136,44 +136,118 @@ class DatasetObject:
             ###     
             
             if self.rule == 'Drichlet':
-                cls_priors   = np.random.dirichlet(alpha=[self.rule_arg]*self.n_cls,size=self.n_client)
-                prior_cumsum = np.cumsum(cls_priors, axis=1)
                 idx_list = [np.where(trn_y==i)[0] for i in range(self.n_cls)]
-                cls_amount = [len(idx_list[i]) for i in range(self.n_cls)]
+                
+                alpha_list = [self.rule_arg for _ in range(self.n_client)]
+                num_samples_c = int(len(trn_y) / self.n_cls)
+                print('num_sample_c: ', num_samples_c)
+                min_size = 0
+                
+                
+                while min_size < 2500:
+                    total_number = 0
+                    clnt_x = [ [] for clnt__ in range(self.n_client) ]
+                    clnt_y = [ [] for clnt__ in range(self.n_client) ]
+                    
+                    for i in range(self.n_cls):
+                        client_port = np.random.dirichlet(alpha=alpha_list)
+                        number = client_port * num_samples_c
+                        number = np.int32(number)
+                        left = num_samples_c - number.sum()
+                        if left > 0:
+                            lucky_client = np.random.randint(low=0, high=self.n_client)
+                            number[lucky_client] += left
+                        total_number += number
+                        for j in range(self.n_client):
+                            this_x = trn_x[idx_list[i][number[:j].sum():number[:j+1].sum()]]
+                            this_y = trn_y[idx_list[i][number[:j].sum():number[:j+1].sum()]]
+                            clnt_x[j].append(this_x)
+                            clnt_y[j].append(this_y)
+                    min_size = np.min(total_number)
+                
+                for i in range(self.n_client):
+                    clnt_x[i] = np.concatenate(clnt_x[i])
+                    clnt_y[i] = np.concatenate(clnt_y[i])
+                    rand_perm = np.random.permutation(len(clnt_y[i]))
+                    clnt_x[i] = clnt_x[i][rand_perm]
+                    clnt_y[i] = clnt_y[i][rand_perm]
 
-                clnt_x = [ np.zeros((clnt_data_list[clnt__], self.channels, self.height, self.width)).astype(np.float32) for clnt__ in range(self.n_client) ]
-                clnt_y = [ np.zeros((clnt_data_list[clnt__], 1)).astype(np.int64) for clnt__ in range(self.n_client) ]
-    
-                while(np.sum(clnt_data_list)!=0):
-                    curr_clnt = np.random.randint(self.n_client)
-                    # If current node is full resample a client
-                    print('Remaining Data: %d' %np.sum(clnt_data_list))
-                    if clnt_data_list[curr_clnt] <= 0:
-                        continue
-                    clnt_data_list[curr_clnt] -= 1
-                    curr_prior = prior_cumsum[curr_clnt]
-                    while True:
-                        cls_label = np.argmax(np.random.uniform() <= curr_prior)
-                        # Redraw class label if trn_y is out of that class
-                        if cls_amount[cls_label] <= 0:
-                            continue
-                        cls_amount[cls_label] -= 1
+                # shuffle
+                
+                print()
+                print("Num of training samples / client:")
+                print(total_number, sum(total_number))
+                print("Details of data partition:")
+                cls_counts = {}
+                for i, this_y in enumerate(clnt_y):
+                    cls_counts[i] = {}
+                    for cls_ in this_y:
+                        cls_ = cls_[0]
+                        if cls_ not in cls_counts[i]:
+                            cls_counts[i][cls_] = 1
+                        else:
+                            cls_counts[i][cls_] += 1
+                print(cls_counts)
+                print()
+
+
+            # if self.rule == 'Drichlet':
+            #     cls_priors   = np.random.dirichlet(alpha=[self.rule_arg]*self.n_cls,size=self.n_client)
+            #     prior_cumsum = np.cumsum(cls_priors, axis=1)
+            #     idx_list = [np.where(trn_y==i)[0] for i in range(self.n_cls)]
+            #     cls_amount = [len(idx_list[i]) for i in range(self.n_cls)]
+
+            #     clnt_x = [ np.zeros((clnt_data_list[clnt__], self.channels, self.height, self.width)).astype(np.float32) for clnt__ in range(self.n_client) ]
+            #     clnt_y = [ np.zeros((clnt_data_list[clnt__], 1)).astype(np.int64) for clnt__ in range(self.n_client) ]
+
+                
+            #     while(np.sum(clnt_data_list)!=0):
+            #         curr_clnt = np.random.randint(self.n_client)
+            #         # If current node is full resample a client
+            #         print('Remaining Data: %d' %np.sum(clnt_data_list))
+            #         if clnt_data_list[curr_clnt] <= 0:
+            #             continue
+            #         clnt_data_list[curr_clnt] -= 1
+            #         curr_prior = prior_cumsum[curr_clnt]
+            #         while True:
+            #             cls_label = np.argmax(np.random.uniform() <= curr_prior)
+            #             # Redraw class label if trn_y is out of that class
+            #             if cls_amount[cls_label] <= 0:
+            #                 continue
+            #             cls_amount[cls_label] -= 1
                         
-                        clnt_x[curr_clnt][clnt_data_list[curr_clnt]] = trn_x[idx_list[cls_label][cls_amount[cls_label]]]
-                        clnt_y[curr_clnt][clnt_data_list[curr_clnt]] = trn_y[idx_list[cls_label][cls_amount[cls_label]]]
+            #             clnt_x[curr_clnt][clnt_data_list[curr_clnt]] = trn_x[idx_list[cls_label][cls_amount[cls_label]]]
+            #             clnt_y[curr_clnt][clnt_data_list[curr_clnt]] = trn_y[idx_list[cls_label][cls_amount[cls_label]]]
 
-                        break
+            #             break
+                    
+            #     print()
+            #     print("Details of data partition:")
+            #     cls_counts = {}
+            #     for i, this_y in enumerate(clnt_y):
+            #         cls_counts[i] = {}
+            #         for cls_ in this_y:
+            #             print(cls_)
+            #             input()
+            #             cls_ = cls_[0]
+            #             if cls_ not in cls_counts[i]:
+            #                 cls_counts[i][cls_] = 1
+            #             else:
+            #                 cls_counts[i][cls_] += 1
+            #     print(cls_counts)
+            #     print()
+            #     input()
                 
-                clnt_x = np.asarray(clnt_x)
-                clnt_y = np.asarray(clnt_y)
+            #     clnt_x = np.asarray(clnt_x)
+            #     clnt_y = np.asarray(clnt_y)
                 
-                cls_means = np.zeros((self.n_client, self.n_cls))
-                for clnt in range(self.n_client):
-                    for cls in range(self.n_cls):
-                        cls_means[clnt,cls] = np.mean(clnt_y[clnt]==cls)
-                prior_real_diff = np.abs(cls_means-cls_priors)
-                print('--- Max deviation from prior: %.4f' %np.max(prior_real_diff))
-                print('--- Min deviation from prior: %.4f' %np.min(prior_real_diff))
+            #     cls_means = np.zeros((self.n_client, self.n_cls))
+            #     for clnt in range(self.n_client):
+            #         for cls in range(self.n_cls):
+            #             cls_means[clnt,cls] = np.mean(clnt_y[clnt]==cls)
+            #     prior_real_diff = np.abs(cls_means-cls_priors)
+            #     print('--- Max deviation from prior: %.4f' %np.max(prior_real_diff))
+            #     print('--- Min deviation from prior: %.4f' %np.min(prior_real_diff))
             
             elif self.rule == 'iid' and self.dataset == 'CIFAR100' and self.unbalanced_sgm==0:
                 assert len(trn_y)//100 % self.n_client == 0 
