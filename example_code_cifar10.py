@@ -1,6 +1,7 @@
 from utils_general import *
 from utils_methods import *
 from utils_methods_FedDC import train_FedDC
+from utilsours import get_network
 # Dataset initialization
 data_path = 'Folder/' # The folder to save Data & Model
 
@@ -33,14 +34,14 @@ data_obj = DatasetObject(dataset='CIFAR10', n_client=n_client, seed=23, rule='ii
 # Dirichlet (0.3)
 # data_obj = DatasetObject(dataset='CIFAR10', n_client=n_client, seed=20, unbalanced_sgm=0, rule='Drichlet', rule_arg=0.3, data_path=data_path)
 
-model_name = 'cifar10_LeNet' # Model type
+model_name = 'ConvNet_CIFAR10'  # [ConvNet_CIFAR10,ConvNet_CIFAR100,ConvNet_F]
 
 ###
 # Common hyperparameters
 
 com_amount = 600
 save_period = 200
-weight_decay = 1e-3
+weight_decay = 0
 batch_size = 50
 #act_prob = 1
 act_prob = 0.15
@@ -96,8 +97,8 @@ learning_rate = 0.1
 print_per = epoch // 2
 
 [avg_ins_mdls, avg_cld_mdls, avg_all_mdls, trn_sel_clt_perf, tst_sel_clt_perf, trn_cur_cld_perf, tst_cur_cld_perf, trn_all_clt_perf, tst_all_clt_perf] = train_FedDyn(data_obj=data_obj, act_prob=act_prob,
-                                    learning_rate=learning_rate, batch_size=batch_size, epoch=epoch, 
-                                    com_amount=com_amount, print_per=print_per, weight_decay=weight_decay, 
+                                    learning_rate=learning_rate, batch_size=batch_size, epoch=epoch,
+                                    com_amount=com_amount, print_per=print_per, weight_decay=weight_decay,
                                     model_func=model_func, init_model=init_model, alpha_coef=alpha_coef,
                                     sch_step=1, sch_gamma=1,save_period=save_period, suffix=suffix, trial=False,
                                     data_path=data_path, lr_decay_per_round=lr_decay_per_round)
@@ -116,10 +117,10 @@ print_per = 5
 
 
 [fed_mdls_sel, trn_perf_sel, tst_perf_sel, fed_mdls_all, trn_perf_all, tst_perf_all] = train_SCAFFOLD(data_obj=data_obj, act_prob=act_prob ,
-                                    learning_rate=learning_rate, batch_size=batch_size, n_minibatch=n_minibatch, 
-                                    com_amount=com_amount, print_per=n_minibatch//2, weight_decay=weight_decay, 
+                                    learning_rate=learning_rate, batch_size=batch_size, n_minibatch=n_minibatch,
+                                    com_amount=com_amount, print_per=n_minibatch//2, weight_decay=weight_decay,
                                     model_func=model_func, init_model=init_model,
-                                    sch_step=1, sch_gamma=1, save_period=save_period, suffix=suffix, 
+                                    sch_step=1, sch_gamma=1, save_period=save_period, suffix=suffix,
                                     trial=False, data_path=data_path, lr_decay_per_round=lr_decay_per_round)
 
 ####
@@ -130,13 +131,13 @@ learning_rate = 0.1
 print_per = 5
 
 [fed_mdls_sel, trn_perf_sel, tst_perf_sel, fed_mdls_all, trn_perf_all, tst_perf_all] = train_FedAvg(data_obj=data_obj, act_prob=act_prob ,
-                                    learning_rate=learning_rate, batch_size=batch_size, epoch=epoch, 
-                                    com_amount=com_amount, print_per=print_per, weight_decay=weight_decay, 
+                                    learning_rate=learning_rate, batch_size=batch_size, epoch=epoch,
+                                    com_amount=com_amount, print_per=print_per, weight_decay=weight_decay,
                                     model_func=model_func, init_model=init_model,
-                                    sch_step=1, sch_gamma=1, save_period=save_period, suffix=suffix, 
+                                    sch_step=1, sch_gamma=1, save_period=save_period, suffix=suffix,
                                     trial=False, data_path=data_path, lr_decay_per_round=lr_decay_per_round)
-        
-# #### 
+
+# ####
 print('FedProx')
 
 epoch = 5
@@ -146,9 +147,9 @@ mu = 1e-4
 
 
 [fed_mdls_sel, trn_perf_sel, tst_perf_sel, fed_mdls_all, trn_perf_all, tst_perf_all]  = train_FedProx(data_obj=data_obj, act_prob=act_prob ,
-                                learning_rate=learning_rate, batch_size=batch_size, epoch=epoch, 
-                                com_amount=com_amount, print_per=print_per, weight_decay=weight_decay, 
+                                learning_rate=learning_rate, batch_size=batch_size, epoch=epoch,
+                                com_amount=com_amount, print_per=print_per, weight_decay=weight_decay,
                                 model_func=model_func, init_model=init_model, sch_step=1, sch_gamma=1,
                                 save_period=save_period, mu=mu, suffix=suffix, trial=False,
                                 data_path=data_path, lr_decay_per_round=lr_decay_per_round)
-           
+

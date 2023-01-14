@@ -1,5 +1,6 @@
 from utils_libs import *
 import torchvision.models as models
+from utilsours import get_network
 
 class client_model(nn.Module):
     def __init__(self, name, args=True):
@@ -84,8 +85,16 @@ class client_model(nn.Module):
             self.embedding = nn.Embedding(input_length, embedding_dim)
             self.stacked_LSTM = nn.LSTM(input_size=embedding_dim, hidden_size=hidden_size, num_layers=num_LSTM)
             self.fc = nn.Linear(hidden_size, self.n_cls)
-              
-        
+
+        if self.name == "ConvNet_CIFAR10":
+            self.model = get_network("ConvNet",3,10)
+
+        if self.name == "ConvNet_CIFAR100":
+            self.model = get_network("ConvNet", 3, 100)
+
+        if self.name == "ConvNet_F":
+            self.model = get_network("ConvNet", 1, 10)
+
     def forward(self, x):
         if self.name == 'Linear':
             x = self.fc(x)
@@ -128,6 +137,8 @@ class client_model(nn.Module):
             # Choose last hidden layer
             last_hidden = output[-1,:,:]
             x = self.fc(last_hidden)
+        if self.name == "ConvNet_CIFAR10" or self.name == "ConvNet_CIFAR100" or self.name == "ConvNet_F":
+            x = self.model(x)
 
         return x
     
