@@ -20,26 +20,26 @@ class DatasetObject:
             # Get Raw data                
             if self.dataset == 'mnist':
                 transform = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.1307,), (0.3081,))])
-                trnset = torchvision.datasets.MNIST(root='%sData/Raw' %self.data_path, 
+                trnset = torchvision.datasets.FashionMNIST(root='%sData/Raw' %self.data_path, 
                                                     train=True , download=True, transform=transform)
-                tstset = torchvision.datasets.MNIST(root='%sData/Raw' %self.data_path, 
+                tstset = torchvision.datasets.FashionMNIST(root='%sData/Raw' %self.data_path, 
                                                     train=False, download=True, transform=transform)
                 
-                trn_load = torch.utils.data.DataLoader(trnset, batch_size=60000, shuffle=False, num_workers=1)
-                tst_load = torch.utils.data.DataLoader(tstset, batch_size=10000, shuffle=False, num_workers=1)
+                trn_load = torch.utils.data.DataLoader(trnset, batch_size=60000, shuffle=False, num_workers=0)
+                tst_load = torch.utils.data.DataLoader(tstset, batch_size=10000, shuffle=False, num_workers=0)
                 self.channels = 1; self.width = 28; self.height = 28; self.n_cls = 10;
             
             if self.dataset == 'CIFAR10':
                 transform = transforms.Compose([transforms.ToTensor(),
-                                                transforms.Normalize(mean=[0.491, 0.482, 0.447], std=[0.247, 0.243, 0.262])])
+                                                transforms.Normalize(mean=[0.4914, 0.4822, 0.4465], std=[0.2023, 0.1994, 0.2010])])
 
                 trnset = torchvision.datasets.CIFAR10(root='%sData/Raw' %self.data_path,
                                                       train=True , download=True, transform=transform)
                 tstset = torchvision.datasets.CIFAR10(root='%sData/Raw' %self.data_path,
                                                       train=False, download=True, transform=transform)
                 
-                trn_load = torch.utils.data.DataLoader(trnset, batch_size=50000, shuffle=False, num_workers=1)
-                tst_load = torch.utils.data.DataLoader(tstset, batch_size=10000, shuffle=False, num_workers=1)
+                trn_load = torch.utils.data.DataLoader(trnset, batch_size=50000, shuffle=False, num_workers=0)
+                tst_load = torch.utils.data.DataLoader(tstset, batch_size=10000, shuffle=False, num_workers=0)
                 self.channels = 3; self.width = 32; self.height = 32; self.n_cls = 10;
                 
             if self.dataset == 'CIFAR100':
@@ -144,7 +144,7 @@ class DatasetObject:
                 min_size = 0
                 
                 
-                while min_size < 2500:
+                while min_size < 100:
                     total_number = 0
                     clnt_x = [ [] for clnt__ in range(self.n_client) ]
                     clnt_y = [ [] for clnt__ in range(self.n_client) ]

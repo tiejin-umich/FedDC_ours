@@ -32,19 +32,19 @@ n_client = 10
 # Dirichlet (0.6)
 # data_obj = DatasetObject(dataset='CIFAR10', n_client=n_client, seed=20, unbalanced_sgm=0, rule='Drichlet', rule_arg=0.6, data_path=data_path)
 # Dirichlet (0.3)
-data_obj = DatasetObject(dataset='CIFAR10', n_client=n_client, seed=20, unbalanced_sgm=0, rule='Drichlet', rule_arg=0.01, data_path=data_path)
+data_obj = DatasetObject(dataset='mnist', n_client=n_client, seed=0, unbalanced_sgm=0, rule='Drichlet', rule_arg=0.01, data_path=data_path)
 
-model_name = 'MLP_CIFAR10'  # [ConvNet_CIFAR10,ConvNet_CIFAR100,ConvNet_F]
+model_name = 'ConvNet_F'  # [ConvNet_CIFAR10,ConvNet_CIFAR100,ConvNet_F]
 
 ###
 # Common hyperparameters
 
-com_amount = 400
+com_amount = 200
 save_period = 200
 weight_decay = 0
 batch_size = 500
-act_prob = 1
-#act_prob = 0.5
+#act_prob = 1
+act_prob = 0.5
 suffix = model_name
 #lr_decay_per_round = 0.998
 lr_decay_per_round = 1
@@ -68,23 +68,23 @@ else:
 
 ####
 
-print('FedDC')
 
 epoch = 1
-alpha_coef = 0.001
-learning_rate = 0.0005
-print_per = 2
+alpha_coef = 0.1
+learning_rate = 0.01
+print_per = 400
 
 
 n_data_per_client = np.array([x.shape[0] for x in data_obj.clnt_x])
 n_iter_per_epoch  = np.ceil(n_data_per_client/batch_size)
 n_minibatch = (epoch*n_iter_per_epoch).astype(np.int64)
 
-[avg_ins_mdls, avg_cld_mdls, avg_all_mdls, trn_sel_clt_perf, tst_sel_clt_perf, trn_cur_cld_perf, tst_cur_cld_perf, trn_all_clt_perf, tst_all_clt_perf] = train_FedDC(data_obj=data_obj, act_prob=act_prob, n_minibatch=n_minibatch, 
-                                    learning_rate=learning_rate, batch_size=batch_size, epoch=epoch, 
+
+[fed_mdls_sel, trn_perf_sel, tst_perf_sel, fed_mdls_all, trn_perf_all, tst_perf_all] = train_SCAFFOLD(data_obj=data_obj, act_prob=act_prob ,
+                                    learning_rate=learning_rate, batch_size=batch_size, n_minibatch=n_minibatch, 
                                     com_amount=com_amount, print_per=print_per, weight_decay=weight_decay, 
-                                    model_func=model_func, init_model=init_model, alpha_coef=alpha_coef,
-                                    sch_step=1, sch_gamma=1,save_period=save_period, suffix=suffix, trial=False,
-                                    data_path=data_path, lr_decay_per_round=lr_decay_per_round)
+                                    model_func=model_func, init_model=init_model,
+                                    sch_step=1, sch_gamma=1, save_period=save_period, suffix=suffix, 
+                                    trial=False, data_path=data_path, lr_decay_per_round=lr_decay_per_round)
 #exit(0)
 ###

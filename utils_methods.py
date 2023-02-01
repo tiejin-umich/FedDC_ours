@@ -504,7 +504,7 @@ def train_SCAFFOLD(data_obj, act_prob ,learning_rate, batch_size, n_minibatch,
                                      model_func, init_model, sch_step, sch_gamma,
                                      save_period, suffix = '', trial=True, data_path='', rand_seed=0, lr_decay_per_round=1, global_learning_rate=1):
     suffix = 'Scaffold_' + suffix
-    suffix += '_S%d_F%f_Lr%f_%d_%f_B%d_K%d_W%f' %(save_period, act_prob, learning_rate, sch_step, sch_gamma, batch_size, n_minibatch, weight_decay)
+    suffix += '_S%d_F%f_Lr%f_%d_%f_B%d_K%d_W%f' %(save_period, act_prob, learning_rate, sch_step, sch_gamma, batch_size, n_minibatch[0], weight_decay)
    
     suffix += '_lrdecay%f' %lr_decay_per_round
     suffix += '_seed%d' %rand_seed
@@ -634,11 +634,11 @@ def train_SCAFFOLD(data_obj, act_prob ,learning_rate, batch_size, n_minibatch,
                 state_params_diff_curr = torch.tensor(-state_params_diffs[clnt] + state_params_diffs[-1]/weight_list[clnt], dtype=torch.float32, device=device)
                 
                 clnt_models[clnt] = train_scaffold_mdl(clnt_models[clnt], model_func, state_params_diff_curr, trn_x, trn_y, 
-                    learning_rate * (lr_decay_per_round ** i), batch_size, n_minibatch, print_per,
+                    learning_rate * (lr_decay_per_round ** i), batch_size, n_minibatch[clnt], print_per,
                     weight_decay, data_obj.dataset, sch_step, sch_gamma)
                 
                 curr_model_param = get_mdl_params([clnt_models[clnt]], n_par)[0]
-                new_c = state_params_diffs[clnt] - state_params_diffs[-1] + 1/n_minibatch/learning_rate * (prev_params - curr_model_param)
+                new_c = state_params_diffs[clnt] - state_params_diffs[-1] + 1/n_minibatch[clnt]/learning_rate * (prev_params - curr_model_param)
                 # Scale up delta c
                 delta_c_sum += (new_c - state_params_diffs[clnt])*weight_list[clnt]
                 state_params_diffs[clnt] = new_c
@@ -771,6 +771,8 @@ def train_FedDyn(data_obj, act_prob,
     
     n_clnt = data_obj.n_client
     clnt_x = data_obj.clnt_x; clnt_y=data_obj.clnt_y
+
+    res = []
     
     cent_x = np.concatenate(clnt_x, axis=0)
     cent_y = np.concatenate(clnt_y, axis=0)
@@ -1010,6 +1012,7 @@ def train_FedDyn(data_obj, act_prob,
             print("**** Cur cld Communication %3d, Test Accuracy: %.4f, Loss: %.4f" 
                   %(i+1, acc_tst, loss_tst))
             tst_cur_cld_perf[i] = [loss_tst, acc_tst]
+            res.append(acc_tst)
             
             
             writer.add_scalars('Loss/test', 
@@ -1069,6 +1072,6 @@ def train_FedDyn(data_obj, act_prob,
                 avg_ins_mdls[i//save_period] = avg_model_sel
                 avg_all_mdls[i//save_period] = all_model
                 avg_cld_mdls[i//save_period] = cur_cld_model
-                    
+    np.save("scaffold.npy", res)
     return avg_ins_mdls, avg_cld_mdls, avg_all_mdls, trn_sel_clt_perf, tst_sel_clt_perf, trn_cur_cld_perf, tst_cur_cld_perf, trn_all_clt_perf, tst_all_clt_perf
     

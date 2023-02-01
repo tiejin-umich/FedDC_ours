@@ -17,6 +17,8 @@ def train_FedDC(data_obj, act_prob,n_minibatch,
     suffix += '_seed%d' %rand_seed
     suffix += '_lrdecay%f' %lr_decay_per_round
 
+    res = []
+
     n_clnt = data_obj.n_client
     clnt_x = data_obj.clnt_x; clnt_y=data_obj.clnt_y
     
@@ -172,7 +174,7 @@ def train_FedDC(data_obj, act_prob,n_minibatch,
                 curr_model_par = get_mdl_params([clnt_models[clnt]], n_par)[0]
                 delta_param_curr = curr_model_par-cld_mdl_param
                 parameter_drifts[clnt] += delta_param_curr 
-                beta = 1/n_minibatch/learning_rate
+                beta = 1/n_minibatch[clnt]/learning_rate
                 
                 state_g = local_update_last - global_update_last + beta * (-delta_param_curr) 
                 delta_g_cur = (state_g - state_gadient_diffs[clnt])*weight_list[clnt] 
@@ -258,10 +260,12 @@ def train_FedDC(data_obj, act_prob,n_minibatch,
 
             loss_tst, acc_tst = get_acc_loss(data_obj.tst_x, data_obj.tst_y, 
                                              cur_cld_model, data_obj.dataset, 0)
+            res.append(acc_tst)
             print("**** Cur cld Communication %3d, Test Accuracy: %.4f, Loss: %.4f" 
                   %(i+1, acc_tst, loss_tst))
             tst_cur_cld_perf[i] = [loss_tst, acc_tst]
-            
+
+
             
             writer.add_scalars('Loss/test', 
                    {
@@ -320,7 +324,7 @@ def train_FedDC(data_obj, act_prob,n_minibatch,
                 avg_ins_mdls[i//save_period] = avg_model_sel
                 avg_all_mdls[i//save_period] = all_model
                 avg_cld_mdls[i//save_period] = cur_cld_model
-                    
+    np.save("feddc_nome.npy", res)
     return avg_ins_mdls, avg_cld_mdls, avg_all_mdls, trn_sel_clt_perf, tst_sel_clt_perf, trn_cur_cld_perf, tst_cur_cld_perf, trn_all_clt_perf, tst_all_clt_perf
 
 

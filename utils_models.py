@@ -94,6 +94,15 @@ class client_model(nn.Module):
 
         if self.name == "ConvNet_F":
             self.model = get_network("ConvNet", 1, 10)
+        
+        if self.name == "MLP_CIFAR10":
+            self.model = get_network("MLP",3,10)
+
+        if self.name == "MLP_CIFAR100":
+            self.model = get_network("MLP", 3, 100)
+
+        if self.name == "MLP_F":
+            self.model = get_network("MLP", 1, 10)
 
     def forward(self, x):
         if self.name == 'Linear':
@@ -138,6 +147,9 @@ class client_model(nn.Module):
             last_hidden = output[-1,:,:]
             x = self.fc(last_hidden)
         if self.name == "ConvNet_CIFAR10" or self.name == "ConvNet_CIFAR100" or self.name == "ConvNet_F":
+            x = self.model(x)
+
+        if self.name == "MLP_CIFAR10" or self.name == "MLP_CIFAR100" or self.name == "MLP_F":
             x = self.model(x)
 
         return x
