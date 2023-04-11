@@ -683,7 +683,26 @@ class Dataset(torch.utils.data.Dataset):
             else:
                 y = self.y_data[idx]
                 return img, y
-            
+
+        elif self.name == 'TinyImageNet':
+            img = self.X_data[idx]
+            if self.train:
+                img = np.flip(img, axis=2).copy() if (np.random.rand() > .5) else img # Horizontal flip
+                if (np.random.rand() > .5):
+                # Random cropping 
+                    pad = 4
+                    extended_img = np.zeros((3,64 + pad *2, 64 + pad *2)).astype(np.float32)
+                    extended_img[:,pad:-pad,pad:-pad] = img
+                    dim_1, dim_2 = np.random.randint(pad * 2 + 1, size=2)
+                    img = extended_img[:,dim_1:dim_1+64,dim_2:dim_2+64]
+            img = np.moveaxis(img, 0, -1)
+            img = self.transform(img)
+            if isinstance(self.y_data, bool):
+                return img
+            else:
+                y = self.y_data[idx]
+                return img, y
+
         elif self.name == 'shakespeare':
             x = self.X_data[idx]
             y = self.y_data[idx] 
