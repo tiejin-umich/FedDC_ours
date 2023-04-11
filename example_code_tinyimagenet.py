@@ -68,6 +68,8 @@ else:
 
 print('FedDC')
 
+init_model = init_model.to(device)
+
 epoch = 1
 alpha_coef = 0.1
 learning_rate = 0.01
