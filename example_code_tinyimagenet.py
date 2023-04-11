@@ -67,8 +67,6 @@ else:
 ####
 
 print('FedDC')
-print(device)
-init_model = init_model.to(device)
 
 epoch = 1
 alpha_coef = 0.1
