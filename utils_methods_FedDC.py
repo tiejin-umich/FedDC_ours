@@ -135,19 +135,20 @@ def train_FedDC(data_obj, act_prob,n_minibatch,
             cur_cld_model.load_state_dict(copy.deepcopy(dict(fed_cld.named_parameters())))
             cld_mdl_param = get_mdl_params([cur_cld_model], n_par)[0]
         
-    
+        np.random.seed(0)
+        select_size = int(act_prob * n_clnt)
         for i in range(saved_itr+1, com_amount):
             inc_seed = 0
-            while(True):
-                np.random.seed(i + rand_seed + inc_seed)
-                act_list    = np.random.uniform(size=n_clnt)
-                act_clients = act_list <= act_prob
-                selected_clnts = np.sort(np.where(act_clients)[0])
-                unselected_clnts = np.sort(np.where(act_clients == False)[0])
-                inc_seed += 1
-                if len(selected_clnts) != 0:
-                    break
-
+            #while(True):
+                #np.random.seed(i + rand_seed + inc_seed)
+                #act_list    = np.random.uniform(size=n_clnt)
+                #act_clients = act_list <= act_prob
+                #selected_clnts = np.sort(np.where(act_clients)[0])
+                #unselected_clnts = np.sort(np.where(act_clients == False)[0])
+                #inc_seed += 1
+                #if len(selected_clnts) != 0:
+                    #break
+            selected_clnts =  np.random.choice(list(range(n_clnt)), size= select_size,replace=False)
             global_mdl = torch.tensor(cld_mdl_param, dtype=torch.float32, device=device) #Theta
             del clnt_models
             clnt_models = list(range(n_clnt))
@@ -203,44 +204,44 @@ def train_FedDC(data_obj, act_prob,n_minibatch,
             
             #####
 
-            loss_tst, acc_tst = get_acc_loss(cent_x, cent_y, 
-                                             all_model, data_obj.dataset, 0)
-            print("**** Cur All Communication %3d, Cent Accuracy: %.4f, Loss: %.4f" 
-                  %(i+1, acc_tst, loss_tst))
-            trn_all_clt_perf[i] = [loss_tst, acc_tst]
+            #loss_tst, acc_tst = get_acc_loss(cent_x, cent_y, 
+             #                                all_model, data_obj.dataset, 0)
+            #print("**** Cur All Communication %3d, Cent Accuracy: %.4f, Loss: %.4f" 
+             #     %(i+1, acc_tst, loss_tst))
+            #trn_all_clt_perf[i] = [loss_tst, acc_tst]
             
             #####
 
-            loss_tst, acc_tst = get_acc_loss(cent_x, cent_y, 
-                                             cur_cld_model, data_obj.dataset, 0)
-            print("**** Cur cld Communication %3d, Cent Accuracy: %.4f, Loss: %.4f" 
-                  %(i+1, acc_tst, loss_tst))
-            trn_cur_cld_perf[i] = [loss_tst, acc_tst]
+            #loss_tst, acc_tst = get_acc_loss(cent_x, cent_y, 
+             #                                cur_cld_model, data_obj.dataset, 0)
+            #print("**** Cur cld Communication %3d, Cent Accuracy: %.4f, Loss: %.4f" 
+            #      %(i+1, acc_tst, loss_tst))
+            #trn_cur_cld_perf[i] = [loss_tst, acc_tst]
             
                         
-            writer.add_scalars('Loss/train', 
-                   {
-                       'Sel clients':trn_sel_clt_perf[i][0],
-                       'All clients':trn_all_clt_perf[i][0],
-                       'Current cloud':trn_cur_cld_perf[i][0]
-                   }, i
-                  )
+           # writer.add_scalars('Loss/train', 
+             #      {
+            #           'Sel clients':trn_sel_clt_perf[i][0],
+             #          'All clients':trn_all_clt_perf[i][0],
+             #          'Current cloud':trn_cur_cld_perf[i][0]
+              #     }, i
+              #    )
             
-            writer.add_scalars('Accuracy/train', 
-                   {
-                       'Sel clients':trn_sel_clt_perf[i][1],
-                       'All clients':trn_all_clt_perf[i][1],
-                       'Current cloud':trn_cur_cld_perf[i][1]
-                   }, i
-                  )
-            
-            writer.add_scalars('Loss/train_wd', 
-                   {
-                       'Sel clients':get_acc_loss(cent_x, cent_y, avg_model_sel, data_obj.dataset, weight_decay)[0],
-                       'All clients':get_acc_loss(cent_x, cent_y, all_model, data_obj.dataset, weight_decay)[0],
-                       'Current cloud':get_acc_loss(cent_x, cent_y, cur_cld_model, data_obj.dataset, weight_decay)[0]
-                   }, i
-                  )
+            #writer.add_scalars('Accuracy/train', 
+             #      {
+              #         'Sel clients':trn_sel_clt_perf[i][1],
+             #          'All clients':trn_all_clt_perf[i][1],
+              #         'Current cloud':trn_cur_cld_perf[i][1]
+             #      }, i
+            #      )
+            #
+           # writer.add_scalars('Loss/train_wd', 
+             #      {
+            #           'Sel clients':get_acc_loss(cent_x, cent_y, avg_model_sel, data_obj.dataset, weight_decay)[0],
+            #           'All clients':get_acc_loss(cent_x, cent_y, all_model, data_obj.dataset, weight_decay)[0],
+            #           'Current cloud':get_acc_loss(cent_x, cent_y, cur_cld_model, data_obj.dataset, weight_decay)[0]
+            #       }, i
+             #     )
             
             #####
 

@@ -144,7 +144,7 @@ class DatasetObject:
                 min_size = 0
                 
                 
-                while min_size < 100:
+                while min_size < 500:
                     total_number = 0
                     clnt_x = [ [] for clnt__ in range(self.n_client) ]
                     clnt_y = [ [] for clnt__ in range(self.n_client) ]

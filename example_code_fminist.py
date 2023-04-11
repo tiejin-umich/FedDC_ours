@@ -33,13 +33,20 @@ data_path = 'Folder/' # The folder to save Data & Model
 
 # Generate IID or Dirichlet distribution
 # IID
-n_client = 10
+n_client = 40
 #data_obj = DatasetObject(dataset='mnist', n_client=n_client, seed=23, rule='iid', unbalanced_sgm=0, data_path=data_path)
 
 # Dirichlet (0.6)
 data_obj = DatasetObject(dataset='mnist', n_client=n_client, seed=0, unbalanced_sgm=0, rule='Drichlet', rule_arg=0.04, data_path=data_path)
 
 model_name = 'ConvNet_F' # Model type
+# transform = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.1307,), (0.3081,))])
+# tstset = torchvision.datasets.FashionMNIST(root='%sData/Raw' % data_path,
+#                                       train=False, download=True, transform=transform)
+# tst_load = torch.utils.data.DataLoader(tstset, batch_size=10000, shuffle=False, num_workers=0)
+# for images, labels in tst_load:
+#     print(labels[:10])
+#     break
 
 ###
 # Common hyperparameters
@@ -48,7 +55,7 @@ save_period = 100
 weight_decay = 0
 batch_size = 500
 #act_prob = 1
-act_prob = 0.5
+act_prob = 0.2
 suffix = model_name
 lr_decay_per_round = 1
 
@@ -74,14 +81,16 @@ else:
 # # ####
 print('FedDC')
 
-epoch = 1
+epoch = 2
 alpha_coef =0.1
 learning_rate = 0.01
 print_per = 5
-
+#print(data_obj.tst_y[:1000])
 n_data_per_client = np.array([x.shape[0] for x in data_obj.clnt_x])
 n_iter_per_epoch  = np.ceil(n_data_per_client/batch_size)
 n_minibatch = (epoch*n_iter_per_epoch).astype(np.int64)
+
+#print(data_obj.tst_y[:20])
 
 [avg_ins_mdls, avg_cld_mdls, avg_all_mdls, trn_sel_clt_perf, tst_sel_clt_perf, trn_cur_cld_perf, tst_cur_cld_perf, trn_all_clt_perf, tst_all_clt_perf] = train_FedDC(data_obj=data_obj, act_prob=act_prob, n_minibatch=n_minibatch, 
                                     learning_rate=learning_rate, batch_size=batch_size, epoch=epoch, 

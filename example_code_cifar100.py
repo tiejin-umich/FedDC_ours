@@ -20,7 +20,7 @@ data_path = 'Folder/' # The folder to save Data & Model
 # data_obj = ShakespeareObjectCrop_noniid(storage_path, name, crop_amount = 2000)
 #########
 
-n_client = 80
+n_client = 40
 # Generate IID or Dirichlet distribution
 # IID
 #data_obj = DatasetObject(dataset='CIFAR100', n_client=n_client, seed=23, rule='iid', unbalanced_sgm=0, data_path=data_path)
@@ -30,19 +30,19 @@ n_client = 80
 # Dirichlet (0.6)
 # data_obj = DatasetObject(dataset='CIFAR100', n_client=n_client, seed=20, unbalanced_sgm=0, rule='Drichlet', rule_arg=0.6, data_path=data_path)
 # Dirichlet (0.3)
-data_obj = DatasetObject(dataset='CIFAR100', n_client=n_client, seed=20, unbalanced_sgm=0, rule='Drichlet', rule_arg=0.01, data_path=data_path)
+data_obj = DatasetObject(dataset='CIFAR100', n_client=n_client, seed=0, unbalanced_sgm=0, rule='Drichlet', rule_arg=0.04, data_path=data_path)
 
 model_name = 'ConvNet_CIFAR100' # Model type
 
 ###
 # Common hyperparameters
 
-com_amount = 2000
+com_amount = 1000
 save_period = 200
 weight_decay = 0
-batch_size = 50
+batch_size = 500
 #act_prob = 1
-act_prob = 0.125
+act_prob = 0.25
 suffix = model_name
 lr_decay_per_round = 1
 
@@ -74,7 +74,8 @@ learning_rate = 0.01
 print_per = 5
 
 
-n_data_per_client = np.array([x.shape[0] for x in data_obj.clnt_x])
+#n_data_per_client = np.array([x.shape[0] for x in data_obj.clnt_x])
+n_data_per_client = np.array([5000 for x in data_obj.clnt_x])
 n_iter_per_epoch  = np.ceil(n_data_per_client/batch_size)
 n_minibatch = (epoch*n_iter_per_epoch).astype(np.int64)
 
