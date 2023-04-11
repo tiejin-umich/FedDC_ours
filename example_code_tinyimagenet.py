@@ -67,7 +67,7 @@ else:
 ####
 
 print('FedDC')
-
+print(device)
 init_model = init_model.to(device)
 
 epoch = 1

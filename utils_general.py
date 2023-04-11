@@ -423,7 +423,7 @@ def train_model_alg(model, model_func, alpha_coef, avg_mdl_param, hist_params_di
 def train_model_FedDC(model, model_func, alpha, local_update_last, global_update_last, global_model_param, hist_i, trn_x, trn_y, 
                     learning_rate, batch_size, epoch, print_per,
                     weight_decay, dataset_name, sch_step, sch_gamma):
-    
+    print(device)
     n_trn = trn_x.shape[0]
     state_update_diff = torch.tensor(-local_update_last+ global_update_last,  dtype=torch.float32, device=device)  
     trn_gen = data.DataLoader(Dataset(trn_x, trn_y, train=True, dataset_name=dataset_name), batch_size=batch_size, shuffle=True)
