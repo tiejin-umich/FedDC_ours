@@ -1,4 +1,5 @@
 from utils_libs import *
+from tin import TinyImageNetDataset
 
 class DatasetObject:
     def __init__(self, dataset, n_client, seed, rule, unbalanced_sgm=0, rule_arg='', data_path=''):
@@ -55,6 +56,17 @@ class DatasetObject:
                 tst_load = torch.utils.data.DataLoader(tstset, batch_size=10000, shuffle=False, num_workers=0)
                 self.channels = 3; self.width = 32; self.height = 32; self.n_cls = 100;
             
+            if self.dataset == 'TinyImageNet':
+                print(self.dataset)
+                mean = [0.485, 0.456, 0.406]
+                std = [0.229, 0.224, 0.225]
+                transform = transforms.Compose([transforms.ToTensor(), transforms.Normalize(mean=mean, std=std)])
+                trnset = TinyImageNetDataset('%sData/Raw' %self.data_path, mode='train', download=False, transform=transform) # no augmentation
+                tstset = TinyImageNetDataset('%sData/Raw' %self.data_path, mode='val', download=False, transform=transform)
+                trn_load = torch.utils.data.DataLoader(trnset, batch_size=100000, shuffle=False, num_workers=0)
+                tst_load = torch.utils.data.DataLoader(tstset, batch_size=10000, shuffle=False, num_workers=0)
+                self.channels = 3; self.width = 64; self.height = 64; self.n_cls = 200;
+                
             if self.dataset != 'emnist':
                 trn_itr = trn_load.__iter__(); tst_itr = tst_load.__iter__() 
                 # labels are of shape (n_data,)
@@ -144,7 +156,7 @@ class DatasetObject:
                 min_size = 0
                 
                 
-                while min_size < 500:
+                while min_size < 2500:
                     total_number = 0
                     clnt_x = [ [] for clnt__ in range(self.n_client) ]
                     clnt_y = [ [] for clnt__ in range(self.n_client) ]
@@ -310,6 +322,8 @@ class DatasetObject:
                 self.channels = 3; self.width = 32; self.height = 32; self.n_cls = 10;
             if self.dataset == 'CIFAR100':
                 self.channels = 3; self.width = 32; self.height = 32; self.n_cls = 100;
+            if self.dataset == 'TinyImageNet':
+                self.channels = 3; self.width = 64; self.height = 64; self.n_cls = 200;
             if self.dataset == 'fashion_mnist':
                 self.channels = 1; self.width = 28; self.height = 28; self.n_cls = 10;
             if self.dataset == 'emnist':
