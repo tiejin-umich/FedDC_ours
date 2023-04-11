@@ -634,7 +634,7 @@ class Dataset(torch.utils.data.Dataset):
             if not isinstance(data_y, bool):
                 self.y_data = torch.tensor(data_y).float()
             
-        elif self.name == 'CIFAR10' or self.name == 'CIFAR100':
+        elif self.name == 'CIFAR10' or self.name == 'CIFAR100' or self.name == 'TinyImageNet':
             self.train = train
             self.transform = transforms.Compose([transforms.ToTensor()])
         
